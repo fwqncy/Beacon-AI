@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · Beacon</title>
+  <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    body {
+      min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+      background:
+        radial-gradient(900px 520px at 50% 115%, rgba(109, 62, 232, .55), transparent 70%),
+        radial-gradient(700px 400px at 85% -10%, rgba(139, 92, 246, .16), transparent 70%),
+        var(--bg);
+    }
+    body::before { /* film grain, as in the Beacon artwork */
+      content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .22; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .auth { position: relative; width: 100%; max-width: 400px; }
+    .auth-head { text-align: center; margin-bottom: 26px; }
+    .auth-head img { width: 48px; height: 48px; filter: drop-shadow(0 0 26px rgba(139,92,246,.7)); }
+    .auth-head h1 { font-size: 30px; font-weight: 600; letter-spacing: -0.03em; margin: 12px 0 4px; }
+    .auth-head p { color: var(--muted); margin: 0; font-size: 15px; }
+    .panel { background: rgba(24, 22, 31, .88); backdrop-filter: blur(12px); border: 1px solid var(--border-strong); border-radius: 18px; padding: 22px; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); border: 1px solid var(--border); border-radius: 11px; padding: 3px; margin-bottom: 18px; }
+    .tabs button { border: 0; background: transparent; padding: 7px; border-radius: 8px; color: var(--muted); font-size: 14px; font-weight: 500; }
+    .tabs button.on { background: var(--surface-3); color: var(--text); }
+    label { display: block; font-size: 13px; color: var(--text-2); margin: 0 0 6px; }
+    .field { margin-bottom: 14px; }
+    .field[hidden] { display: none; }
+    input, select {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid var(--border-strong); background: var(--bg); outline: 0; font-size: 15px;
+    }
+    select { text-transform: capitalize; }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .primary {
+      width: 100%; margin-top: 4px; padding: 11px; border: 0; border-radius: 10px;
+      background: linear-gradient(180deg, var(--accent-hi), var(--accent)); color: #fff; font-weight: 600; font-size: 15px;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, .35);
+    }
+    .primary:hover { filter: brightness(1.08); }
+    .primary:disabled { opacity: .6; cursor: default; }
+    .error { color: var(--danger); font-size: 13.5px; margin: 0 0 12px; }
+    .error:empty { display: none; }
+    .demo {
+      display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 16px;
+      padding: 10px 12px; border-radius: 10px; border: 1px dashed var(--border-strong);
+      background: transparent; text-align: left; font-size: 13px; color: var(--muted);
+    }
+    .demo:hover { border-color: var(--accent); color: var(--text-2); }
+    .demo code { font: 12.5px var(--mono); color: var(--accent-hi); }
+    .foot { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 18px; }
+  </style>
+</head>
+<body>
+  <main class="auth">
+    <div class="auth-head">
+      <img src="/static/logo.svg" alt="">
+      <h1>Beacon</h1>
+      <p>Your company's knowledge, with sources.</p>
+    </div>
+    <div class="panel">
+      <div class="tabs" role="tablist">
+        <button type="button" class="on" data-mode="login" role="tab">Sign in</button>
+        <button type="button" data-mode="signup" role="tab">Create account</button>
+      </div>
+      <form id="form" novalidate>
+        <div class="field" data-signup hidden>
+          <label for="name">Full name</label>
+          <input id="name" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="email">Work email</label>
+          <input id="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="field" data-signup hidden>
+          <label for="team">Team</label>
+          <select id="team"></select>
+        </div>
+        <p class="error" id="error" role="alert"></p>
+        <button class="primary" id="submit" type="submit">Sign in</button>
+      </form>
+      <button class="demo" id="demo" type="button">
+        <span>Try the demo account: <code>demo@beacon.dev</code> / <code>beacon123</code></span>
+      </button>
+    </div>
+    <p class="foot">Answers are grounded in company documents your team can access.</p>
+  </main>
+<script>
+  const form = document.getElementById("form");
+  const error = document.getElementById("error");
+  const submit = document.getElementById("submit");
+  const field = (id) => document.getElementById(id);
+  let mode = "login";
+
+  function setMode(next) {
+    mode = next;
+    document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
+    document.querySelectorAll("[data-signup]").forEach((el) => (el.hidden = mode !== "signup"));
+    field("password").autocomplete = mode === "signup" ? "new-password" : "current-password";
+    submit.textContent = mode === "signup" ? "Create account" : "Sign in";
+    error.textContent = "";
+  }
+
+  document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
+
+  document.getElementById("demo").addEventListener("click", () => {
+    setMode("login");
+    field("email").value = "demo@beacon.dev";
+    field("password").value = "beacon123";
+    form.requestSubmit();
+  });
+
+  fetch("/auth/teams").then((r) => r.json()).then((teams) => {
+    field("team").innerHTML = teams.map((t) => `<option value="${t}">${t}</option>`).join("");
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    error.textContent = "";
+    const body = { email: field("email").value.trim(), password: field("password").value };
+    if (mode === "signup") Object.assign(body, { name: field("name").value.trim(), team: field("team").value });
+    if (!body.email || !body.password || (mode === "signup" && !body.name)) {
+      error.textContent = "Please fill in every field.";
+      return;
+    }
+    if (mode === "signup" && body.password.length < 6) {
+      error.textContent = "Use a password of at least 6 characters.";
+      return;
+    }
+    submit.disabled = true;
+    try {
+      const res = await fetch(`/auth/${mode}`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+      });
+      if (res.ok) return (location.href = "/");
+      const data = await res.json().catch(() => ({}));
+      error.textContent = typeof data.detail === "string" ? data.detail : "Something went wrong. Please try again.";
+    } catch {
+      error.textContent = "Couldn't reach Beacon. Is the server running?";
+    } finally {
+      submit.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
