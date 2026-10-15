@@ -1,17 +1,17 @@
-# Postgres 17 with pgvector, for running Beacon without a local Postgres install.
+# Postgres 17 with pgvector, for running Arachne without a local Postgres install.
 #   docker compose up -d
-#   DATABASE_URL=postgresql://beacon:beacon@localhost:5433/beacon_app
+#   DATABASE_URL=postgresql://arachne:arachne@localhost:5433/arachne_app
 services:
   db:
     image: pgvector/pgvector:pg17
     environment:
-      POSTGRES_USER: beacon
-      POSTGRES_PASSWORD: beacon
-      POSTGRES_DB: beacon_app
+      POSTGRES_USER: arachne
+      POSTGRES_PASSWORD: arachne
+      POSTGRES_DB: arachne_app
     ports:
       - "5433:5432"
     volumes:
-      - beacon-db:/var/lib/postgresql/data
+      - arachne-db:/var/lib/postgresql/data
 
 volumes:
-  beacon-db:
+  arachne-db:

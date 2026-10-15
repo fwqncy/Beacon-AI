@@ -9,8 +9,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
-from beacon import db
-from beacon.config import COOKIE_SECURE, SESSION_COOKIE, SESSION_DAYS, TEAMS
+from arachne import db
+from arachne.config import COOKIE_SECURE, SESSION_COOKIE, SESSION_DAYS, TEAMS
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

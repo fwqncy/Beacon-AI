@@ -1,0 +1,60 @@
+/* Sign-in page: the knowledge orb on the left, the form on the right. */
+body { min-height: 100vh; min-height: 100dvh; }
+.auth { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(380px, 0.85fr); min-height: 100vh; min-height: 100dvh; }
+
+.hero { position: relative; overflow: hidden; border-right: 1px solid var(--border); }
+.orb { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero-hud { position: absolute; inset: 0; pointer-events: none; }
+.hud-a { position: absolute; left: 40px; top: calc(36px + env(safe-area-inset-top)); }
+.hud-b { position: absolute; right: 36px; top: 34%; }
+.hud-callout {
+  position: absolute; right: 42px; bottom: 30%; margin: 0; padding: 10px 12px;
+  border: 1px solid var(--border-strong); background: color-mix(in oklab, var(--bg) 75%, transparent);
+  font: 500 11px/1.55 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-2);
+}
+.crosshair { position: absolute; left: 22%; bottom: 22%; width: 54px; height: 54px; color: var(--accent-hi); opacity: .55; }
+.vertical-mark {
+  position: absolute; left: 14px; bottom: 40px; writing-mode: vertical-rl; transform: rotate(180deg);
+  font: 500 11px var(--mono); letter-spacing: .4em; text-transform: uppercase; color: var(--muted);
+}
+.hero-copy { position: absolute; left: 40px; bottom: calc(40px + env(safe-area-inset-bottom)); max-width: 420px; }
+.hero-copy h1 { font-size: clamp(54px, 7vw, 92px); line-height: .95; margin: 0 0 10px; }
+.hero-copy p { margin: 0; color: var(--text-2); font-size: 16px; }
+.motion-toggle { position: absolute; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); background: color-mix(in oklab, var(--bg) 70%, transparent); }
+.motion-toggle .play, .motion-toggle[aria-pressed="true"] .pause { display: none; }
+.motion-toggle[aria-pressed="true"] .play { display: block; }
+
+.panel-wrap { display: grid; place-items: center; padding: 32px 24px calc(32px + env(safe-area-inset-bottom)); background: var(--sidebar); }
+.panel { width: 100%; max-width: 380px; }
+.panel-mark { width: 34px; height: 34px; color: var(--accent-hi); }
+.panel h2 { font: 500 30px/1.15 var(--display); margin: 14px 0 6px; }
+.panel-sub { color: var(--muted); margin: 0 0 22px; }
+
+.modes { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; margin-bottom: 20px; background: var(--bg); border: 1px solid var(--border); border-radius: 11px; }
+.mode { min-height: 36px; border: 0; background: transparent; border-radius: 8px; color: var(--muted); font-size: 14px; font-weight: 500; }
+.mode:hover { color: var(--text); }
+.mode[aria-pressed="true"] { background: var(--surface-3); color: var(--text); box-shadow: var(--shadow-1); }
+
+.field { margin-bottom: 16px; }
+.form-error { color: var(--danger); font-size: 14px; margin: 0 0 12px; }
+.form-error:empty { display: none; }
+.submit { width: 100%; min-height: 44px; font-size: 15px; }
+
+.demo {
+  display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 18px; padding: 12px 14px;
+  border-radius: var(--r-md); border: 1px dashed var(--border-strong); background: transparent;
+  text-align: left; font-size: 13px; color: var(--muted); transition: border-color .15s, color .15s;
+}
+.demo:hover { border-color: var(--accent-hi); color: var(--text-2); }
+.demo .hud-key { color: var(--accent-hi); flex: none; }
+.demo code { font: 12.5px var(--mono); color: var(--text-2); }
+
+@media (max-width: 900px) {
+  .auth { grid-template-columns: 1fr; grid-template-rows: 40vh auto; }
+  .hero { border-right: 0; border-bottom: 1px solid var(--border); min-height: 300px; }
+  .hud-b, .hud-callout, .crosshair, .vertical-mark { display: none; }
+  .hud-a { left: 16px; top: calc(16px + env(safe-area-inset-top)); }
+  .hero-copy { left: 16px; bottom: 16px; right: 64px; }
+  .hero-copy p { font-size: 14px; }
+  .panel-wrap { place-items: start center; padding-top: 28px; }
+}

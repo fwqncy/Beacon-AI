@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" style="color-scheme: dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0E0E0F">
+  <title>Sign In · Arachne</title>
+  <script>try{var t=JSON.parse(localStorage.getItem("arachne:theme")||"null");if(t){for(var k in t.vars)document.documentElement.style.setProperty(k,t.vars[k]);document.documentElement.dataset.motion=t.motion||"system";var m=document.querySelector('meta[name="theme-color"]');if(m&&t.vars["--bg"])m.content=t.vars["--bg"];}}catch(e){}</script>
+  <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/login.css">
+  <link rel="modulepreload" href="/static/vendor/three.module.min.js">
+  <link rel="modulepreload" href="/static/vendor/three.core.js">
+  <script type="importmap">{ "imports": { "three": "/static/vendor/three.module.min.js" } }</script>
+  <script src="/static/vendor/gsap.min.js" defer></script>
+  <script type="module" src="/static/js/login.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#email">Skip to Sign In</a>
+<main class="auth">
+  <section class="hero" aria-labelledby="heroTitle">
+    <canvas class="orb" id="orb" aria-hidden="true"></canvas>
+    <div class="hero-hud" aria-hidden="true">
+      <span class="hud-tag hud-a"><span class="hud-key">ARC—01</span><span class="hud-val">Knowledge Orb</span></span>
+      <span class="hud-tag hud-b"><span class="hud-key">Signal</span><span class="hud-val">Grounded</span></span>
+      <p class="hud-callout">Every answer<br>links back to<br>its source page.</p>
+      <svg class="crosshair"><use href="/static/icons.svg#i-crosshair"/></svg>
+      <span class="vertical-mark">Arachne · Knowledge Web</span>
+    </div>
+    <div class="hero-copy">
+      <h1 class="display" id="heroTitle" translate="no">Arachne</h1>
+      <p>Your company’s knowledge, spun into one web, with a source for every answer.</p>
+    </div>
+    <button type="button" class="icon-btn motion-toggle" id="motionToggle" aria-pressed="false" aria-label="Pause Animation" title="Pause Animation">
+      <svg class="icon pause" aria-hidden="true"><use href="/static/icons.svg#i-pause"/></svg>
+      <svg class="icon play" aria-hidden="true"><use href="/static/icons.svg#i-play"/></svg>
+    </button>
+  </section>
+
+  <section class="panel-wrap" aria-labelledby="formTitle">
+    <div class="panel">
+      <svg class="panel-mark" aria-hidden="true"><use href="/static/icons.svg#logo"/></svg>
+      <h2 id="formTitle">Sign In to Arachne</h2>
+      <p class="panel-sub" id="formSub">Pick up the thread where you left it.</p>
+
+      <div class="modes" role="group" aria-label="Account">
+        <button type="button" class="mode" data-mode="login" aria-pressed="true">Sign In</button>
+        <button type="button" class="mode" data-mode="signup" aria-pressed="false">Create Account</button>
+      </div>
+
+      <form id="form" novalidate>
+        <div class="field" data-signup hidden>
+          <label class="field-label" for="name">Full Name</label>
+          <input class="input" id="name" name="name" autocomplete="name" placeholder="Sam Rivera" aria-describedby="nameError">
+          <p class="field-error" id="nameError"></p>
+        </div>
+        <div class="field">
+          <label class="field-label" for="email">Work Email</label>
+          <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="username"
+                 autocapitalize="off" spellcheck="false" placeholder="name@company.com" aria-describedby="emailError">
+          <p class="field-error" id="emailError"></p>
+        </div>
+        <div class="field">
+          <label class="field-label" for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" autocomplete="current-password" aria-describedby="passwordError passwordHint">
+          <p class="hint" id="passwordHint" data-signup hidden>At least 6 characters.</p>
+          <p class="field-error" id="passwordError"></p>
+        </div>
+        <div class="field" data-signup hidden>
+          <label class="field-label" for="team">Team</label>
+          <select class="input" id="team" name="team"></select>
+          <p class="hint">You’ll see company-wide documents plus your team’s own.</p>
+        </div>
+        <p class="form-error" id="formError" role="alert"></p>
+        <button class="btn btn-primary submit" id="submit" type="submit"><span id="submitLabel">Sign In</span></button>
+      </form>
+
+      <button class="demo" id="demo" type="button">
+        <span class="hud-key">Demo</span>
+        <span>Use the demo account <code translate="no">demo@arachne.dev</code> / <code translate="no">arachne123</code></span>
+      </button>
+    </div>
+  </section>
+</main>
+</body>
+</html>

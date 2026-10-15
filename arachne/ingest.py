@@ -1,7 +1,7 @@
 """Index documents into pgvector.
 
-    python -m beacon.ingest data/docs            # a folder (recursively)
-    python -m beacon.ingest handbook.pdf --team finance
+    python -m arachne.ingest data/docs            # a folder (recursively)
+    python -m arachne.ingest handbook.pdf --team finance
 
 Supported formats:
   * PDF  - one passage set per page, cited as "p.N".
@@ -16,8 +16,8 @@ from typing import Iterable, List, Optional, Tuple
 
 import asyncpg
 
-from beacon import db
-from beacon.embed import embed_passages
+from arachne import db
+from arachne.embed import embed_passages
 
 MAX_CHARS = 1200
 SUFFIXES = {".md", ".markdown", ".txt", ".pdf"}
@@ -125,7 +125,7 @@ async def ingest(paths: Iterable[str], team: Optional[str] = None) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Index documents for Beacon")
+    parser = argparse.ArgumentParser(description="Index documents for Arachne")
     parser.add_argument("paths", nargs="+")
     parser.add_argument("--team", help="restrict these documents to one team (default: front matter or 'all')")
     args = parser.parse_args()

@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urlunparse
 import asyncpg
 from pgvector.asyncpg import register_vector
 
-from beacon.config import DATABASE_URL, EMBED_DIM
+from arachne.config import DATABASE_URL, EMBED_DIM
 
 pool: Optional[asyncpg.Pool] = None
 
@@ -63,6 +63,13 @@ CREATE TABLE IF NOT EXISTS chunks (
 );
 CREATE INDEX IF NOT EXISTS chunks_embedding_idx
     ON chunks USING hnsw (embedding vector_cosine_ops);
+
+-- v2: preferences, answer feedback, Spider-Sense suggestions, token usage, undoable deletes
+ALTER TABLE users    ADD COLUMN IF NOT EXISTS prefs      JSONB NOT NULL DEFAULT '{{}}';
+ALTER TABLE chats    ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS feedback   SMALLINT CHECK (feedback IN (-1, 1));
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS related    JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS usage      JSONB;
 """
 
 

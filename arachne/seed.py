@@ -1,18 +1,18 @@
 """Create the database, index the sample company documents and add demo accounts.
 
-    python -m beacon.seed
+    python -m arachne.seed
 """
 import asyncio
 
-from beacon import db
-from beacon.auth import create_user
-from beacon.config import DOCS_DIR
-from beacon.ingest import ingest
+from arachne import db
+from arachne.auth import create_user
+from arachne.config import DOCS_DIR
+from arachne.ingest import ingest
 
 DEMO_USERS = [
     # (name, email, password, team)
-    ("Sam Rivera", "demo@beacon.dev", "beacon123", "engineering"),
-    ("Jordan Lee", "finance@beacon.dev", "beacon123", "finance"),
+    ("Sam Rivera", "demo@arachne.dev", "arachne123", "engineering"),
+    ("Jordan Lee", "finance@arachne.dev", "arachne123", "finance"),
 ]
 
 

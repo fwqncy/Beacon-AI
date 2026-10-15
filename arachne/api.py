@@ -1,4 +1,4 @@
-# beacon/api.py: grounded answers, streamed with citations
+# arachne/api.py: grounded answers, streamed with citations
 import asyncio
 import re
 from contextlib import asynccontextmanager
@@ -11,11 +11,11 @@ from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from beacon import auth, chats, db
-from beacon.auth import User, current_user, optional_user
-from beacon.config import EFFORT, MIN_SCORE, MODEL, STATIC_DIR, TOP_K
-from beacon.embed import embed, warm
-from beacon.prompts import NO_ANSWER, SYSTEM_PROMPT, Hit, build_prompt, cite, sources_payload
+from arachne import auth, chats, db, insights
+from arachne.auth import User, current_user, optional_user
+from arachne.config import EFFORT, MIN_SCORE, MODEL, STATIC_DIR, TOP_K
+from arachne.embed import embed, warm
+from arachne.prompts import NO_ANSWER, SYSTEM_PROMPT, Hit, build_prompt, cite, sources_payload
 
 
 @asynccontextmanager
@@ -26,10 +26,25 @@ async def lifespan(_: FastAPI):
     await db.close()
 
 
-app = FastAPI(title="Beacon", lifespan=lifespan)
+app = FastAPI(title="Arachne", lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(chats.router)
+app.include_router(chats.messages_router)
+app.include_router(insights.router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.middleware("http")
+async def revalidate(request, call_next):
+    """Browsers must re-check our own pages & scripts (cheap 304s via ETag), so updates show up on reload.
+    Pinned third-party libraries in /static/vendor can be cached for a long time."""
+    response = await call_next(request)
+    path = request.url.path
+    if path.startswith("/static/vendor/"):
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif path.startswith("/static/") or response.headers.get("content-type", "").startswith("text/html"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
 
 client = AsyncAnthropic()
 
@@ -47,13 +62,16 @@ async def ask(q: Question, user: User = Depends(current_user)):
 
     hits = await search(retrieval_query(q.text, history), team=user.team, k=TOP_K)
     if not hits:
-        await chats.add_message(chat_id, "assistant", NO_ANSWER)
-        return {"answer": None, "reason": "no matching documents", "message": NO_ANSWER, "chat_id": chat_id}
+        message_id = await chats.add_message(chat_id, "assistant", NO_ANSWER)
+        return {
+            "answer": None, "reason": "no matching documents",
+            "message": NO_ANSWER, "chat_id": chat_id, "message_id": message_id,
+        }
 
-    prompt = build_prompt(q.text, hits)
+    prompt = build_prompt(q.text, hits, profile=await insights.prompt_profile(user))
 
     async def stream():
-        answer = []
+        answer, usage = [], None
         try:
             async with client.messages.stream(
                 model=MODEL,
@@ -69,8 +87,9 @@ async def ask(q: Question, user: User = Depends(current_user)):
                     answer.append(text)
                     yield text
                 final = await s.get_final_message()
+            usage = {"input_tokens": final.usage.input_tokens, "output_tokens": final.usage.output_tokens}
             if final.stop_reason == "refusal" and not answer:
-                answer.append("Beacon can't help with that request.")
+                answer.append("Arachne can't help with that request.")
                 yield answer[-1]
             elif final.stop_reason == "max_tokens":
                 answer.append(" …")
@@ -78,17 +97,19 @@ async def ask(q: Question, user: User = Depends(current_user)):
         except (anthropic.AuthenticationError, TypeError) as e:
             if isinstance(e, TypeError) and "authentication" not in str(e):
                 raise  # a real bug, not the SDK reporting missing credentials
-            answer.append("Beacon isn't connected to Claude yet: set `ANTHROPIC_API_KEY` in `.env` and restart.")
+            answer.append("Arachne isn't connected to Claude yet: set `ANTHROPIC_API_KEY` in `.env` and restart.")
             yield answer[-1]
         except anthropic.RateLimitError:
-            answer.append("Beacon is getting a lot of questions right now. Please try again in a moment.")
+            answer.append("Arachne is getting a lot of questions right now. Please try again in a moment.")
             yield answer[-1]
         except (anthropic.APIStatusError, anthropic.APIConnectionError) as e:
-            answer.append(f"Beacon couldn't reach Claude ({type(e).__name__}). Please try again.")
+            answer.append(f"Arachne couldn't reach Claude ({type(e).__name__}). Please try again.")
             yield answer[-1]
         finally:
-            await chats.add_message(chat_id, "assistant", "".join(answer), sources_payload(hits))
-        yield cite(hits)
+            message_id = await chats.add_message(chat_id, "assistant", "".join(answer), sources_payload(hits), usage)
+        related = await insights.spider_sense("".join(answer), hits, user.team)
+        await chats.set_related(message_id, related)
+        yield cite(hits, related, message_id)
 
     return StreamingResponse(
         stream(), media_type="text/plain; charset=utf-8", headers={"X-Chat-Id": chat_id}
@@ -98,7 +119,7 @@ async def ask(q: Question, user: User = Depends(current_user)):
 async def search(text: str, team: str, k: int) -> List[Hit]:
     vec = await embed(text)
     rows = await db.pool.fetch(
-        """SELECT d.title, c.locator, c.content, 1 - (c.embedding <=> $1) AS score
+        """SELECT c.id, d.title, c.locator, c.content, 1 - (c.embedding <=> $1) AS score
            FROM chunks c JOIN documents d ON d.id = c.document_id
            WHERE d.team IN ('all', $2)
            ORDER BY c.embedding <=> $1
@@ -121,7 +142,7 @@ async def follow_references(hits: List[Hit], team: str, limit: int = 2) -> List[
         if len(extra) >= limit or (name.lower(), locator) in have:
             continue
         row = await db.pool.fetchrow(
-            """SELECT d.title, c.locator, c.content, 0.0::float8 AS score
+            """SELECT c.id, d.title, c.locator, c.content, 0.0::float8 AS score
                FROM chunks c JOIN documents d ON d.id = c.document_id
                WHERE lower(d.title) = lower($1) AND c.locator = $2 AND d.team IN ('all', $3)
                LIMIT 1""",
@@ -147,11 +168,6 @@ def retrieval_query(text: str, history: List[dict]) -> str:
     return text
 
 
-@app.get("/me")
-async def me(user: User = Depends(current_user)) -> User:
-    return user
-
-
 @app.get("/")
 async def index(user: Optional[User] = Depends(optional_user)):
     if user is None:
@@ -162,6 +178,13 @@ async def index(user: Optional[User] = Depends(optional_user)):
 @app.get("/c/{chat_id}")
 async def chat_page(chat_id: str, user: Optional[User] = Depends(optional_user)):
     return await index(user)
+
+
+@app.get("/web")
+async def web_page(user: Optional[User] = Depends(optional_user)):
+    if user is None:
+        return RedirectResponse("/login")
+    return FileResponse(STATIC_DIR / "web.html")
 
 
 @app.get("/login")

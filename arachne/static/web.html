@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" style="color-scheme: dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0E0E0F">
+  <title>Your Web · Arachne</title>
+  <script>try{var t=JSON.parse(localStorage.getItem("arachne:theme")||"null");if(t){for(var k in t.vars)document.documentElement.style.setProperty(k,t.vars[k]);document.documentElement.dataset.motion=t.motion||"system";var m=document.querySelector('meta[name="theme-color"]');if(m&&t.vars["--bg"])m.content=t.vars["--bg"];}}catch(e){}</script>
+  <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/web.css">
+  <link rel="modulepreload" href="/static/vendor/three.module.min.js">
+  <link rel="modulepreload" href="/static/vendor/three.core.js">
+  <script type="importmap">{ "imports": { "three": "/static/vendor/three.module.min.js" } }</script>
+  <script src="/static/vendor/gsap.min.js" defer></script>
+  <script type="module" src="/static/js/web.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#panel">Skip to Your Web Details</a>
+<div class="web-layout">
+  <section class="stage" aria-labelledby="webTitle">
+    <header class="stage-head">
+      <a class="back" href="/"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-arrow-left"/></svg>Back to Chats</a>
+      <h1 class="display" id="webTitle">Your Web</h1>
+      <p class="stage-sub">Every question spins another thread. Sections you’ve explored light up, & each chat hangs on the spiral as a dewdrop.</p>
+    </header>
+
+    <div class="viewport">
+      <canvas class="constellation" id="constellation" tabindex="0" role="img"
+              aria-label="Your knowledge web as an orb web. Drag or use the arrow keys to turn it, and + or − to zoom."></canvas>
+      <div class="anchor-labels" id="labels" aria-hidden="true"></div>
+      <div class="stage-controls" role="toolbar" aria-label="Web Controls">
+        <button type="button" class="icon-btn" id="playPause" aria-pressed="false" aria-label="Pause Motion" title="Pause Motion">
+          <svg class="icon pause" aria-hidden="true"><use href="/static/icons.svg#i-pause"/></svg>
+          <svg class="icon play" aria-hidden="true"><use href="/static/icons.svg#i-play"/></svg>
+        </button>
+        <button type="button" class="icon-btn" id="replay" aria-label="Replay Spin" title="Replay Spin"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-replay"/></svg></button>
+        <button type="button" class="icon-btn" id="resetView" aria-label="Reset View" title="Reset View"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-crosshair"/></svg></button>
+      </div>
+
+      <ul class="legend" aria-label="Legend">
+        <li><span class="key key-lit"></span>Explored section</li>
+        <li><span class="key key-dim"></span>Unexplored section</li>
+        <li><span class="key key-dew"></span>Chat</li>
+        <li><span class="key key-bond"></span>Cited together</li>
+      </ul>
+
+      <div class="empty-state" id="emptyState" hidden>
+        <p class="hud-key">Web Status // Unspun</p>
+        <h2 class="display">Your web is waiting for its first thread</h2>
+        <p>Ask Arachne a question & the sections it cites will light up here.</p>
+        <a class="btn btn-primary" href="/">Ask Your First Question</a>
+      </div>
+    </div>
+    <div class="tip" id="tip" role="tooltip" hidden></div>
+  </section>
+
+  <aside class="panel" id="panel" tabindex="-1" aria-label="Your Web Details">
+    <section class="hud-card rank" aria-labelledby="rankTitle">
+      <p class="card-key">01 // Rank</p>
+      <div class="rank-row">
+        <span class="rank-level tnum" id="rankLevel">LV&nbsp;1</span>
+        <h2 class="display" id="rankTitle">Spiderling</h2>
+      </div>
+      <progress id="rankProgress" max="1" value="0" aria-describedby="rankNext"></progress>
+      <p class="hint" id="rankNext"></p>
+    </section>
+
+    <section class="hud-card" aria-labelledby="statsTitle">
+      <p class="card-key">02 // Silk Spun</p>
+      <h2 class="card-title" id="statsTitle">How You Use Arachne</h2>
+      <dl class="stats" id="stats"></dl>
+    </section>
+
+    <section class="hud-card" aria-labelledby="hoursTitle">
+      <p class="card-key">03 // Rhythm</p>
+      <h2 class="card-title" id="hoursTitle">When You Ask</h2>
+      <figure class="hours">
+        <svg id="hoursChart" viewBox="0 0 240 64" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="hours-axis" aria-hidden="true"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>12a</span></div>
+        <figcaption class="hint" id="hoursCaption"></figcaption>
+      </figure>
+    </section>
+
+    <section class="hud-card" id="learned" aria-labelledby="learnedTitle">
+      <p class="card-key">04 // Memory</p>
+      <h2 class="card-title" id="learnedTitle">What Arachne Has Learned</h2>
+      <p class="hint">Worked out from your own chats. Delete a chat & it’s forgotten.</p>
+      <h3 class="mini-title">Topics You Ask About</h3>
+      <ul class="topics" id="topics"></ul>
+      <label class="check-row">
+        <input type="checkbox" id="tailor" name="tailor">
+        <span><span class="check-title">Tailor Answers to You</span><span class="hint">Answer length: <strong id="styleName"></strong>. <a href="/?settings=answers">Change It</a></span></span>
+      </label>
+      <h3 class="mini-title">Exactly What Arachne Adds to Each Question</h3>
+      <pre class="context" id="context" translate="no"></pre>
+    </section>
+
+    <section class="hud-card" id="gaps" aria-labelledby="gapsTitle">
+      <p class="card-key">05 // Gaps</p>
+      <h2 class="card-title" id="gapsTitle">Holes in Your Web</h2>
+      <p class="hint">Questions the documents couldn’t answer, or answers you marked unhelpful. Share these with document owners.</p>
+      <ul class="gap-list" id="gapList"></ul>
+    </section>
+
+    <section class="hud-card" id="threads" aria-labelledby="threadsTitle">
+      <p class="card-key">06 // Threads</p>
+      <h2 class="card-title" id="threadsTitle">Your Chats</h2>
+      <ul class="thread-list" id="threadList"></ul>
+    </section>
+
+    <section class="hud-card" aria-labelledby="engineTitle">
+      <p class="card-key">07 // Engine</p>
+      <h2 class="card-title" id="engineTitle">The Model Behind Your Answers</h2>
+      <dl class="engine" id="engine"></dl>
+    </section>
+  </aside>
+</div>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div class="visually-hidden" id="announcer" aria-live="polite"></div>
+</body>
+</html>

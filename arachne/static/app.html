@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en" style="color-scheme: dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0E0E0F">
+  <title>New Chat · Arachne</title>
+  <script>try{var t=JSON.parse(localStorage.getItem("arachne:theme")||"null");if(t){for(var k in t.vars)document.documentElement.style.setProperty(k,t.vars[k]);document.documentElement.dataset.motion=t.motion||"system";var m=document.querySelector('meta[name="theme-color"]');if(m&&t.vars["--bg"])m.content=t.vars["--bg"];}}catch(e){}</script>
+  <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <link rel="modulepreload" href="/static/vendor/three.module.min.js">
+  <link rel="modulepreload" href="/static/vendor/three.core.js">
+  <script type="importmap">{ "imports": { "three": "/static/vendor/three.module.min.js" } }</script>
+  <script src="/static/vendor/gsap.min.js" defer></script>
+  <script type="module" src="/static/js/app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#input">Skip to Message Box</a>
+
+<div class="app" id="app">
+  <aside class="sidebar" aria-label="Chats & Navigation">
+    <div class="sidebar-top">
+      <a class="brand" href="/" data-brand title="Arachne (right-click for brand assets)">
+        <svg class="brand-mark" aria-hidden="true"><use href="/static/icons.svg#logo"/></svg><span translate="no">arachne</span>
+      </a>
+      <button type="button" class="icon-btn" id="collapse" aria-label="Close Sidebar" title="Close Sidebar"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-panel"/></svg></button>
+    </div>
+
+    <button type="button" class="new-chat" id="newChat">
+      <svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-plus"/></svg>New Chat<kbd data-shortcut="new"></kbd>
+    </button>
+
+    <nav class="nav" aria-label="Primary">
+      <a class="nav-item" href="/web">
+        <svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-web"/></svg><span>Your Web</span><span class="nav-meta" id="rankLabel"></span>
+      </a>
+      <button type="button" class="nav-item" id="openSearch">
+        <svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-search"/></svg><span>Search Chats…</span><kbd data-shortcut="palette"></kbd>
+      </button>
+    </nav>
+
+    <h2 class="section-label" id="recentsLabel">Recents</h2>
+    <nav class="chat-list" id="chatList" aria-labelledby="recentsLabel"></nav>
+
+    <div class="account">
+      <div class="menu" id="menu" role="menu" aria-label="Account" hidden>
+        <p class="menu-email" id="menuEmail" translate="no"></p>
+        <button type="button" role="menuitem" id="menuSettings"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-settings"/></svg>Settings…</button>
+        <a role="menuitem" href="/web"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-web"/></svg>Your Web</a>
+        <button type="button" role="menuitem" id="logout"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-logout"/></svg>Sign Out</button>
+      </div>
+      <button type="button" class="account-btn" id="accountBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="menu">
+        <span class="avatar" id="avatar" aria-hidden="true"></span>
+        <span class="account-meta"><strong id="userName" translate="no"></strong><small id="userTeam"></small></span>
+      </button>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main is-empty" id="main">
+    <canvas class="ambient" id="ambient" aria-hidden="true"></canvas>
+
+    <header class="topbar">
+      <button type="button" class="icon-btn show-when-collapsed" id="expand" aria-label="Open Sidebar" title="Open Sidebar"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-panel"/></svg></button>
+      <button type="button" class="icon-btn show-when-collapsed" id="newChatTop" aria-label="New Chat" title="New Chat"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-plus"/></svg></button>
+      <h1 class="title visually-hidden" id="chatTitle">New Chat</h1>
+      <div class="spacer"></div>
+      <button type="button" class="icon-btn" id="exportChat" aria-label="Export Chat as Markdown" title="Export Chat as Markdown" hidden><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-download"/></svg></button>
+      <button type="button" class="icon-btn" id="openSettings" aria-label="Settings" title="Settings"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#i-settings"/></svg></button>
+    </header>
+
+    <div class="scroll" id="scroll">
+      <section class="welcome" id="welcome" aria-labelledby="greeting">
+        <svg class="welcome-mark" aria-hidden="true"><use href="/static/icons.svg#logo"/></svg>
+        <h2 class="display" id="greeting">Hello</h2>
+        <p class="welcome-sub">Ask anything about how we work. Every answer links back to its source page.</p>
+        <ul class="hud-row" aria-label="Your knowledge base">
+          <li class="hud-tag"><span class="hud-key">Docs</span><span class="hud-val" id="hudDocs">–</span></li>
+          <li class="hud-tag"><span class="hud-key">Passages</span><span class="hud-val" id="hudPassages">–</span></li>
+          <li class="hud-tag"><span class="hud-key">Team</span><span class="hud-val" id="hudTeam">–</span></li>
+          <li class="hud-tag"><span class="hud-key">Rank</span><span class="hud-val" id="hudRank">–</span></li>
+        </ul>
+      </section>
+      <div class="column"><div class="messages" id="messages"></div></div>
+    </div>
+
+    <div class="dock">
+      <div class="column">
+        <form class="composer" id="composer">
+          <label class="visually-hidden" for="input">Message Arachne</label>
+          <textarea id="input" name="question" rows="1" placeholder="Ask anything about how we work…" autocomplete="off"></textarea>
+          <button class="send" id="send" type="submit" aria-label="Send Question" title="Send Question">
+            <svg class="icon up" aria-hidden="true"><use href="/static/icons.svg#i-up"/></svg>
+            <svg class="icon stop" aria-hidden="true"><use href="/static/icons.svg#i-stop"/></svg>
+          </button>
+        </form>
+      </div>
+      <div class="suggestions" id="suggestions">
+        <button type="button" class="suggestion" data-q="How do I order a new laptop for a starter?"><span class="hud-key">IT</span>How do I order a new laptop for a starter?</button>
+        <button type="button" class="suggestion" data-q="How many days of annual leave do I get?"><span class="hud-key">Time Off</span>How many days of annual leave do I get?</button>
+        <button type="button" class="suggestion" data-q="What’s the deadline for submitting expense claims?"><span class="hud-key">Expenses</span>What’s the deadline for submitting expense claims?</button>
+        <button type="button" class="suggestion" data-q="How do I report a security incident?"><span class="hud-key">Security</span>How do I report a security incident?</button>
+      </div>
+      <p class="disclaimer">Arachne answers only from documents your team can access. Check the source before acting on anything important.</p>
+    </div>
+  </main>
+</div>
+
+<dialog class="sheet" id="settings" aria-labelledby="settingsTitle"></dialog>
+<dialog class="palette" id="palette" aria-label="Command Menu"></dialog>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div class="visually-hidden" id="announcer" aria-live="polite"></div>
+</body>
+</html>

@@ -9,7 +9,7 @@ from typing import List
 import numpy as np
 from fastembed import TextEmbedding
 
-from beacon.config import EMBED_MODEL
+from arachne.config import EMBED_MODEL
 
 
 @lru_cache(maxsize=1)
